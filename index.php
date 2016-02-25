@@ -69,39 +69,21 @@ if (isset($_GET['folder'])) {
         ?>
         <hr />
         <p>Your local network ip address is <?php
-            //Test du wifi (wlan0)
-            $command = "/sbin/ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
-            $localIP = exec($command);
-            if ($localIP != '') {
-                echo '(wlan0) <a href="//'.$localIP.'">'.$localIP.'</a>';
-            } else {
-                $wlan = false;
-            }
-            //Pas de wifi, ethernet ?
-            $command = "/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
-            $localIP = exec($command);
-            if ($localIP != '') {
-                if (!isset($wlan)) {
-                    echo ' | ';
+        $interfaces = ['wlan','eth','en'];
+        $found=0;
+        foreach($interfaces as $interface) {
+            for($i=0;$i<5;$i++) {
+                $command = "/sbin/ifconfig '.$interface.$i.' | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
+                $localIP = exec($command);
+                if ($localIP != '') {
+                    echo '('.$interface.$i.') <a href="//'.$localIP.'">'.$localIP.'</a>';
+                    $found++;
                 }
-                echo '(eth0) <a href="//'.$localIP.'">'.$localIP.'</a>';
-            } else {
-                $eth = false;
             }
-            //Pas d'ethernet, mac ?
-            $command = "/sbin/ifconfig en1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
-            $localIP = exec($command);
-            if ($localIP != '') {
-                if (!isset($wlan)) {
-                    echo ' | ';
-                }
-                echo '(en1) <a href="//'.$localIP.'">'.$localIP.'</a>';
-            } else {
-                $en = false;
-            }
-            if (isset($eth) && isset($wlan) && isset($en)) {
-                echo 'No network found.';
-            }
+        }
+        if ($found == 0) {
+            echo 'No network found.';
+        }
         ?></p>
         <hr />
         <ul>
