@@ -73,7 +73,7 @@ if (isset($_GET['folder'])) {
         $found=0;
         foreach($interfaces as $interface) {
             for($i=0;$i<5;$i++) {
-                $command = "/sbin/ifconfig '.$interface.$i.' | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
+                $command = "/sbin/ifconfig ".$interface.$i." | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
                 $localIP = exec($command);
                 if ($localIP != '') {
                     echo '('.$interface.$i.') <a href="//'.$localIP.'">'.$localIP.'</a>';
