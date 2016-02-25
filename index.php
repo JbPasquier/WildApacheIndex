@@ -88,7 +88,18 @@ if (isset($_GET['folder'])) {
             } else {
                 $eth = false;
             }
-            if (isset($eth) && isset($wlan)) {
+            //Pas d'ethernet, mac ?
+            $command = "/sbin/ifconfig en1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
+            $localIP = exec($command);
+            if ($localIP != '') {
+                if (!isset($wlan)) {
+                    echo ' | ';
+                }
+                echo '(en1) <a href="//'.$localIP.'">'.$localIP.'</a>';
+            } else {
+                $en = false;
+            }
+            if (isset($eth) && isset($wlan) && isset($en)) {
                 echo 'No network found.';
             }
         ?></p>
