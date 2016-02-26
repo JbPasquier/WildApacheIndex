@@ -1,4 +1,30 @@
 <?php
+$interfaces = ['wlan', 'eth', 'en'];
+$found = 0;
+$interfaces_text = '';
+$interfaces_text_short = '';
+foreach ($interfaces as $interface) {
+    for ($i = 0;$i < 5;++$i) {
+        $command = '/sbin/ifconfig '.$interface.$i." | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
+        $localIP = exec($command);
+        if ($localIP != '') {
+            $interfaces_text .= '('.$interface.$i.') <a href="//'.$localIP.'">'.$localIP.'</a>';
+            $interfaces_text_short .= '('.$interface.$i.') '.$localIP;
+            ++$found;
+        } else {
+            $command = '/sbin/ifconfig '.$interface.$i." | grep 'inet' | cut -d: -f2 | awk '{ print $2}'";
+            $localIP = exec($command);
+            if ($localIP != '') {
+                $interfaces_text .= '('.$interface.$i.') <a href="//'.$localIP.'">'.$localIP.'</a>';
+                $interfaces_text_short .= '('.$interface.$i.') '.$localIP;
+                ++$found;
+            }
+        }
+    }
+}
+if ($found == 0) {
+    $interfaces_text = 'No network found.';
+}
 $folder = '*';
 $folding = '/';
 if (isset($_GET['folder'])) {
@@ -11,7 +37,7 @@ if (isset($_GET['folder'])) {
 ?><!doctype html>
 <html>
 <head>
-    <title><?php echo $_SERVER['SERVER_ADDR'];?> - <?php echo $folding;?></title>
+    <title><?php echo $interfaces_text_short;?> - <?php echo $folding;?></title>
     <style>
     * {
         font-family: sans-serif;
@@ -68,23 +94,7 @@ if (isset($_GET['folder'])) {
         echo '</ul>';
         ?>
         <hr />
-        <p>Your local network ip address is <?php
-        $interfaces = ['wlan','eth','en'];
-        $found=0;
-        foreach($interfaces as $interface) {
-            for($i=0;$i<5;$i++) {
-                $command = "/sbin/ifconfig ".$interface.$i." | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'";
-                $localIP = exec($command);
-                if ($localIP != '') {
-                    echo '('.$interface.$i.') <a href="//'.$localIP.'">'.$localIP.'</a>';
-                    $found++;
-                }
-            }
-        }
-        if ($found == 0) {
-            echo 'No network found.';
-        }
-        ?></p>
+        <p>Your local network ip address is <?php echo $interfaces_text;?></p>
         <hr />
         <ul>
             <li><a href='https://www.facebook.com/wildcodeschool/'>Facebook</a></li>
